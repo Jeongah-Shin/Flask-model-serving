@@ -1,3 +1,4 @@
+import tensorflow as tf
 from flask import Flask, request
 import json
 
@@ -20,3 +21,15 @@ def detect_face():
             return json.dumps(response)
 
 app.run(host='0.0.0.0', port='8080', debug=True)
+
+def load_model(PB_PATH):
+    graph = tf.Graph()
+    with graph.as_default():
+        detection_graph_def = tf.GraphDef()
+        with tf.gfile.GFile(PB_PATH, 'rb') as fid:
+            serialized_graph = fid.read()
+            detection_graph_def.ParseFromString(serialized_graph)
+            tf.import_graph_def(detection_graph_def, name='')
+            with graph.as_default():
+                sess = tf.Session(graph=graph)
+                return sess, graph
